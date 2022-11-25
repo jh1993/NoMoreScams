@@ -889,7 +889,11 @@ def modify_class(cls):
             if self.spell.get_stat('vengeance'):
                 geist.buffs.append(MercurialVengeance(self.spell))
             
+            self.owner.level.queue_spell(do_summon(self, geist))
+
+        def do_summon(self, geist):
             self.spell.summon(geist, target=self.owner)
+            yield
 
     if cls is HeavenlyIdol:
 
