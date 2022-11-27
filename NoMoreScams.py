@@ -406,9 +406,6 @@ def modify_class(cls):
             angel.asset_name = "seraphim"
             angel.tags = [Tags.Holy, Tags.Fire]
 
-            angel.sprite.char ='S'
-            angel.sprite.color = Tags.Holy.color
-
             angel.max_hp = self.get_stat('minion_health')
             angel.shields = self.get_stat('shields')
 
@@ -422,15 +419,15 @@ def modify_class(cls):
             angel.spells.append(sword)
             angel.flying = True
             if self.get_stat('heal'):
-                angel.buffs.append(HealAuraBuff(self.get_stat('heal'), 5))
+                angel.buffs.append(HealAuraBuff(5, self.get_stat("radius", base=5)))
 
             if self.get_stat('essence'):
                 aura = EssenceAuraBuff()
-                aura.radius = 5
+                aura.radius = self.get_stat("radius", base=5)
                 angel.buffs.append(aura)
 
             if self.get_stat('holy_fire'):
-                aura = DamageAuraBuff(damage=2, damage_type=[Tags.Fire, Tags.Holy], radius=5)
+                aura = DamageAuraBuff(damage=2, damage_type=[Tags.Fire, Tags.Holy], radius=self.get_stat("radius", base=5))
                 angel.buffs.append(aura)
 
             angel.turns_to_death = self.get_stat('minion_duration')
