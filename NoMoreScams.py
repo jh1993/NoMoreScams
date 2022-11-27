@@ -918,9 +918,38 @@ def modify_class(cls):
 
             self.summon(idol, Point(x, y))
 
+    if cls is Level:
+
+        def can_move(self, unit, x, y, teleport=False, force_swap=False):
+
+            if not teleport and distance(Point(unit.x, unit.y), Point(x, y), diag=True) > 1.5:
+                return False
+
+            if not self.is_point_in_bounds(Point(x, y)):
+                return False
+
+            blocker = self.tiles[x][y].unit
+            if blocker is not None:
+                if force_swap:
+                    # Even with force swap, cannot force walkers onto chasms
+                    if not blocker.flying and not self.tiles[x][y].can_walk:
+                        return False
+
+                elif not unit.is_player_controlled or unit.team != blocker.team:
+                    return False
+
+            if not unit.flying:
+                if not self.can_walk(x, y):
+                    return False
+            else:
+                if not self.tiles[x][y].can_fly:
+                    return False
+
+            return True
+
     for func_name, func in [(key, value) for key, value in locals().items() if callable(value)]:
         if hasattr(cls, func_name):
             setattr(cls, func_name, func)
 
-for cls in [SlimeBuff, HallowFlesh, MeltSpell, MeltBuff, Buff, RedStarShrineBuff, Spell, Unit, ElementalClawBuff, LightningSpireArc, Houndlord, SearingSealBuff, SummonArchon, SummonSeraphim, SummonFloatingEye, StunImmune, BlindBuff, InvokeSavagerySpell, ShrapnelBlast, Purestrike, GlassPetrifyBuff, SummonKnights, VoidBeamSpell, DamageAuraBuff, VolcanoTurtleBuff, MordredCorruption, Shrine, PyGameView, MercurizeBuff, HeavenlyIdol]:
+for cls in [SlimeBuff, HallowFlesh, MeltSpell, MeltBuff, Buff, RedStarShrineBuff, Spell, Unit, ElementalClawBuff, LightningSpireArc, Houndlord, SearingSealBuff, SummonArchon, SummonSeraphim, SummonFloatingEye, StunImmune, BlindBuff, InvokeSavagerySpell, ShrapnelBlast, Purestrike, GlassPetrifyBuff, SummonKnights, VoidBeamSpell, DamageAuraBuff, VolcanoTurtleBuff, MordredCorruption, Shrine, PyGameView, MercurizeBuff, HeavenlyIdol, Level]:
     curr_module.modify_class(cls)
