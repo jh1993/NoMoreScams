@@ -48,9 +48,8 @@ def is_conj_skill_summon(unit):
 class FloatingEyeBuff(Buff):
 
     def __init__(self, spell):
-        Buff.__init__(self)
-        self.buff_type = BUFF_TYPE_PASSIVE
         self.spell = spell
+        Buff.__init__(self)
     
     def on_applied(self, owner):
         for spell in self.spell.caster.spells:
