@@ -10,7 +10,7 @@ import math, random, sys
 
 curr_module = sys.modules[__name__]
 
-def is_immune(target, source, damage_type):
+def is_immune(target, source, damage_type, already_checked=[]):
 
     if target.resists[damage_type] < 100:
         return False
@@ -19,8 +19,10 @@ def is_immune(target, source, damage_type):
     
     # Calculate redeals for minions
 
-    if isinstance(source, Spell) and hasattr(source, "can_redeal") and source.can_redeal(target):
-        return False
+    if isinstance(source, Spell) and hasattr(source, "can_redeal") and (source, target) not in already_checked:
+        already_checked.append((source, target))
+        if source.can_redeal(target, already_checked):
+            return False
     
     for buff in target.level.player_unit.buffs:
         if not isinstance(buff, Upgrade):
@@ -37,7 +39,10 @@ def is_immune(target, source, damage_type):
     if not hasattr(target.level, "conditional_redeals"):
         return True
     for buff in target.level.conditional_redeals:
-        if buff.can_redeal(target, source, damage_type):
+        if (buff, target, source, damage_type) in already_checked:
+            continue
+        already_checked.append((buff, target, source, damage_type))
+        if buff.can_redeal(target, source, damage_type, already_checked):
             return False
     
     return True
@@ -206,10 +211,10 @@ def modify_class(cls):
 
         def on_init(self):
             self.global_triggers[EventOnPreDamaged] = self.on_damage
-            self.can_redeal = lambda u, source, damage_type: can_redeal(self, u, source, damage_type)
+            self.can_redeal = lambda u, source, damage_type, already_checked=[]: can_redeal(self, u, source, damage_type, already_checked)
 
-        def can_redeal(self, u, source, damage_type):
-            return source.owner and isinstance(source.owner.source, self.spell_class) and (Tags.Arcane in u.tags or Tags.Dark in u.tags or Tags.Fire in u.tags) and u.resists[Tags.Holy] < 100
+        def can_redeal(self, u, source, damage_type, already_checked=[]):
+            return source.owner and isinstance(source.owner.source, self.spell_class) and (Tags.Arcane in u.tags or Tags.Dark in u.tags or Tags.Fire in u.tags) and not is_immune(u, self, Tags.Holy, already_checked)
 
     if cls is Spell:
 
@@ -318,10 +323,10 @@ def modify_class(cls):
         def on_init(self):
             self.global_triggers[EventOnPreDamaged] = self.on_damage
             self.dtype = None
-            self.can_redeal = lambda u, source, damage_type: can_redeal(self, u, source, damage_type)
+            self.can_redeal = lambda u, source, damage_type, already_checked=[]: can_redeal(self, u, source, damage_type, already_checked)
 
-        def can_redeal(self, u, source, damage_type):
-            return damage_type == Tags.Physical and source.owner and isinstance(source.owner.source, self.spell_class) and not is_immune(u, self, self.dtype)
+        def can_redeal(self, u, source, damage_type, already_checked=[]):
+            return damage_type == Tags.Physical and source.owner and isinstance(source.owner.source, self.spell_class) and not is_immune(u, self, self.dtype, already_checked)
 
     if cls is LightningSpireArc:
 
@@ -531,7 +536,7 @@ def modify_class(cls):
             self.tags = [Tags.Holy, Tags.Arcane]
             self.level = 5
             self.global_triggers[EventOnPreDamaged] = self.on_damage
-            self.can_redeal = lambda unit, source, damage_type: can_redeal(self, unit, source, damage_type)
+            self.can_redeal = lambda unit, source, damage_type, already_checked=[]: can_redeal(self, unit, source, damage_type, already_checked)
 
         def on_damage(self, evt):
             if evt.damage_type != Tags.Physical:
@@ -546,8 +551,8 @@ def modify_class(cls):
                 return
             self.owner.level.queue_spell(self.do_conversion(evt))
         
-        def can_redeal(self, u, source, damage_type):
-            return damage_type == Tags.Physical and source.owner and source.owner.shields > 0 and (u.resists[Tags.Holy] < 100 or u.resists[Tags.Arcane] < 100)
+        def can_redeal(self, u, source, damage_type, already_checked=[]):
+            return damage_type == Tags.Physical and source.owner and source.owner.shields > 0 and (not is_immune(u, self, Tags.Holy, already_checked) or not is_immune(u, self, Tags.Arcane, already_checked))
 
     if cls is GlassPetrifyBuff:
 
