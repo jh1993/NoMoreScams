@@ -268,10 +268,10 @@ def modify_class(cls):
                     if not is_immune(v, self, dtype):
                         return True
 
-            nearby_enemies = self.caster.level.get_units_in_ball(self.caster, self.range + radius)
+            nearby_enemies = self.caster.level.get_units_in_ball(self.caster, self.get_stat("range") + radius)
             nearby_enemies = [u for u in nearby_enemies if is_target(u)]
 
-            possible_cast_points = list(self.caster.level.get_points_in_ball(self.caster.x, self.caster.y, self.range))
+            possible_cast_points = list(self.caster.level.get_points_in_ball(self.caster.x, self.caster.y, self.get_stat("range")))
 
             # Filter points that are not close to any enemies
             potentials = []
@@ -293,7 +293,7 @@ def modify_class(cls):
             random.shuffle(possible_cast_points)
 
             def can_hit(p, u):
-                return distance(p, u, diag=False, euclidean=False) <= radius and (not self.requires_los or self.caster.level.can_see(p.x, p.y, u.x, u.y))
+                return distance(p, u, diag=False, euclidean=False) <= radius and (not self.get_stat("requires_los") or self.caster.level.can_see(p.x, p.y, u.x, u.y))
 
             for p in possible_cast_points:
                 if not any(is_target(u) and can_hit(p, u) for u in self.owner.level.get_units_in_ball(p, radius)):
