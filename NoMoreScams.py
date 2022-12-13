@@ -419,7 +419,9 @@ def modify_class(cls):
 
             sword = SeraphimSwordSwing()
             sword.damage = self.get_stat('minion_damage')
-            sword.arcane = self.get_stat('moonblade')
+            sword.all_damage_types = True
+            if self.get_stat('moonblade'):
+                sword.damage_type.append(Tags.Arcane)
             angel.spells.append(sword)
             angel.flying = True
             if self.get_stat('heal'):
