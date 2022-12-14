@@ -938,9 +938,50 @@ def modify_class(cls):
 
             return True
 
+    if cls is RadiantCold:
+
+        def get_description(self):
+            return "Whenever you cast an [ice] spell, [freeze] the nearest unfrozen enemy to that spell's target for [{duration}_turns:duration].\nEnemies immune to [ice] will be ignored.".format(**self.fmt_dict())
+
+        def on_cast(self, evt):
+
+            if Tags.Ice not in evt.spell.tags:
+                return
+
+            self.owner.level.queue_spell(self.do_freeze(evt))
+
+        def do_freeze(self, evt):
+            targets = [u for u in self.owner.level.units if are_hostile(self.owner, u) and not u.has_buff(FrozenBuff) and u.resists[Tags.Ice] < 100]
+            if targets:
+                target = min(targets, key=lambda u: distance(evt, u))
+                self.owner.level.show_path_effect(Point(evt.x, evt.y), target, Tags.Ice, minor=True)
+                target.apply_buff(FrozenBuff(), self.get_stat('duration'))
+
+            yield
+
+    if cls is FrozenSkullShrineBuff:
+
+        def on_init(self):
+            OnKillShrineBuff.on_init(self)
+            self.duration = 2
+            self.num_targets = 4
+
+        def on_kill(self, unit):
+            targets = self.owner.level.get_units_in_los(unit)
+            targets = [t for t in targets if are_hostile(self.owner, t) and t.resists[Tags.Ice] < 100]
+            if not targets:
+                return
+            random.shuffle(targets)
+            duration = self.get_stat("duration")
+            for u in targets[:self.get_stat("num_targets")]:
+                u.apply_buff(FrozenBuff(), duration)
+
+        def get_description(self):
+            return ("On kill, [freeze] up to [{num_targets}:num_targets] enemies in line of sight of the slain unit for [{duration}_turns:duration].\nEnemies immune to [ice] will be ignored.").format(**self.fmt_dict())
+
     for func_name, func in [(key, value) for key, value in locals().items() if callable(value)]:
         if hasattr(cls, func_name):
             setattr(cls, func_name, func)
 
-for cls in [SlimeBuff, HallowFlesh, MeltSpell, MeltBuff, Buff, RedStarShrineBuff, Spell, Unit, ElementalClawBuff, LightningSpireArc, Houndlord, SearingSealBuff, SummonArchon, SummonSeraphim, SummonFloatingEye, InvokeSavagerySpell, ShrapnelBlast, Purestrike, GlassPetrifyBuff, SummonKnights, VoidBeamSpell, DamageAuraBuff, VolcanoTurtleBuff, MordredCorruption, Shrine, PyGameView, MercurizeBuff, HeavenlyIdol, Level]:
+for cls in [SlimeBuff, HallowFlesh, MeltSpell, MeltBuff, Buff, RedStarShrineBuff, Spell, Unit, ElementalClawBuff, LightningSpireArc, Houndlord, SearingSealBuff, SummonArchon, SummonSeraphim, SummonFloatingEye, InvokeSavagerySpell, ShrapnelBlast, Purestrike, GlassPetrifyBuff, SummonKnights, VoidBeamSpell, DamageAuraBuff, VolcanoTurtleBuff, MordredCorruption, Shrine, PyGameView, MercurizeBuff, HeavenlyIdol, Level, RadiantCold, FrozenSkullShrineBuff]:
     curr_module.modify_class(cls)

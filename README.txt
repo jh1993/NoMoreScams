@@ -30,3 +30,4 @@ This mod changes a number of things so that they behave exactly as described, wh
 - Void Phoenix and volcano turtles can no longer destroy walls, preventing softlocks that can happen when enemies are summoned inside unreachable pockets surrounded by walls.
 - If a spell does not innately have a stat, it can now still benefit from shrines that give flat bonuses to that stat, in case the spell makes use of that stat through an upgrade; the tooltip is changed to say so accordingly. However, that spell won't be able to benefit from percentage bonuses to that stat, since any percentage of 0 is still 0.
 - The player can now swap places with stationary allies, preventing some softlocks.
+- Radiant Chill and Frozen Skull shrine will now ignore ice-immune enemies when choosing their targets, resulting in no dud freezing attempts.
