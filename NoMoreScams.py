@@ -455,21 +455,6 @@ def modify_class(cls):
                 # Ensure point exists before having the eye cast eye spells
                 self.summon(eye, p)
 
-    if cls is StunImmune:
-
-        def on_applied(self, owner):
-            buffs = list(self.owner.buffs)
-            for buff in buffs:
-                if isinstance(buff, Stun):
-                    self.owner.remove_buff(buff)
-
-    if cls is BlindBuff:
-        def on_init(self):
-            self.name = "Blind"
-            self.buff_type = BUFF_TYPE_CURSE
-            self.asset = ['status', 'blind']
-            self.description = "All spells reduced to melee range"
-
     if cls is InvokeSavagerySpell:
 
         def cast(self, x, y):
@@ -957,5 +942,5 @@ def modify_class(cls):
         if hasattr(cls, func_name):
             setattr(cls, func_name, func)
 
-for cls in [SlimeBuff, HallowFlesh, MeltSpell, MeltBuff, Buff, RedStarShrineBuff, Spell, Unit, ElementalClawBuff, LightningSpireArc, Houndlord, SearingSealBuff, SummonArchon, SummonSeraphim, SummonFloatingEye, StunImmune, BlindBuff, InvokeSavagerySpell, ShrapnelBlast, Purestrike, GlassPetrifyBuff, SummonKnights, VoidBeamSpell, DamageAuraBuff, VolcanoTurtleBuff, MordredCorruption, Shrine, PyGameView, MercurizeBuff, HeavenlyIdol, Level]:
+for cls in [SlimeBuff, HallowFlesh, MeltSpell, MeltBuff, Buff, RedStarShrineBuff, Spell, Unit, ElementalClawBuff, LightningSpireArc, Houndlord, SearingSealBuff, SummonArchon, SummonSeraphim, SummonFloatingEye, InvokeSavagerySpell, ShrapnelBlast, Purestrike, GlassPetrifyBuff, SummonKnights, VoidBeamSpell, DamageAuraBuff, VolcanoTurtleBuff, MordredCorruption, Shrine, PyGameView, MercurizeBuff, HeavenlyIdol, Level]:
     curr_module.modify_class(cls)
