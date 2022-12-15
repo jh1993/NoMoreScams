@@ -979,9 +979,28 @@ def modify_class(cls):
         def get_description(self):
             return ("On kill, [freeze] up to [{num_targets}:num_targets] enemies in line of sight of the slain unit for [{duration}_turns:duration].\nEnemies immune to [ice] will be ignored.").format(**self.fmt_dict())
 
+    if cls is SteamAnima:
+
+        def on_unfrozen(self, evt):
+            if evt.dtype != Tags.Fire:
+                return
+
+            for _ in range(self.get_stat('num_summons')):
+                elemental = Unit()
+                elemental.name = "Steam Elemental"
+                elemental.max_hp = self.get_stat('minion_health')
+                elemental.resists[Tags.Physical] = 100
+                elemental.resists[Tags.Fire] = 100
+                elemental.resists[Tags.Ice] = 100
+                elemental.tags = [Tags.Elemental, Tags.Fire, Tags.Ice]
+                elemental.turns_to_death = self.get_stat('minion_duration')
+                elemental.spells.append(SimpleRangedAttack(damage=self.get_stat('minion_damage'), damage_type=Tags.Fire, range=self.get_stat('minion_range')))
+
+                self.summon(elemental, target=evt.unit)
+
     for func_name, func in [(key, value) for key, value in locals().items() if callable(value)]:
         if hasattr(cls, func_name):
             setattr(cls, func_name, func)
 
-for cls in [SlimeBuff, HallowFlesh, MeltSpell, MeltBuff, Buff, RedStarShrineBuff, Spell, Unit, ElementalClawBuff, LightningSpireArc, Houndlord, SearingSealBuff, SummonArchon, SummonSeraphim, SummonFloatingEye, InvokeSavagerySpell, ShrapnelBlast, Purestrike, GlassPetrifyBuff, SummonKnights, VoidBeamSpell, DamageAuraBuff, VolcanoTurtleBuff, MordredCorruption, Shrine, PyGameView, MercurizeBuff, HeavenlyIdol, Level, RadiantCold, FrozenSkullShrineBuff]:
+for cls in [SlimeBuff, HallowFlesh, MeltSpell, MeltBuff, Buff, RedStarShrineBuff, Spell, Unit, ElementalClawBuff, LightningSpireArc, Houndlord, SearingSealBuff, SummonArchon, SummonSeraphim, SummonFloatingEye, InvokeSavagerySpell, ShrapnelBlast, Purestrike, GlassPetrifyBuff, SummonKnights, VoidBeamSpell, DamageAuraBuff, VolcanoTurtleBuff, MordredCorruption, Shrine, PyGameView, MercurizeBuff, HeavenlyIdol, Level, RadiantCold, FrozenSkullShrineBuff, SteamAnima]:
     curr_module.modify_class(cls)
