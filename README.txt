@@ -32,3 +32,4 @@ This mod changes a number of things so that they behave exactly as described, wh
 - The player can now swap places with stationary allies, preventing some softlocks.
 - Radiant Chill and Frozen Skull shrine will now ignore ice-immune enemies when choosing their targets, resulting in no dud freezing attempts.
 - Steam elementals from Steam Anima are now also ice units.
+- Seal Fate Spreading Curse no longer tries to apply the debuff to targets already affected by the debuff.
