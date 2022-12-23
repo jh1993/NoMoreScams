@@ -836,7 +836,7 @@ def modify_class(cls):
 
             has_resists = False
             for tag in Tags:
-                if tag not in self.examine_target.resists:
+                if tag not in self.examine_target.resists or tag == Tags.Heal:
                     continue
                 self.draw_string('%d%% Resist %s' % (self.examine_target.resists[tag], tag.name), self.examine_display, cur_x, cur_y, tag.color.to_tup())
                 has_resists = True
@@ -844,6 +844,16 @@ def modify_class(cls):
 
             if has_resists:
                 cur_y += self.linesize
+
+            amount = self.examine_target.resists[Tags.Heal]
+            if amount != 0:
+                if amount > 0:
+                    word = "Penalty"
+                else:
+                    amount *= -1
+                    word = "Bonus"
+                self.draw_string('%d%% Healing %s' % (amount, word), self.examine_display, cur_x, cur_y, Tags.Heal.color.to_tup())
+                cur_y += self.linesize*2
 
             desc = self.examine_target.get_description()
             if not desc:
