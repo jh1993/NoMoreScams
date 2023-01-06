@@ -16,7 +16,7 @@ This mod changes a number of things so that they behave exactly as described, wh
 - If adjacent squares are blocked by minions summoned by conjuration skills, Houndlord will shunt the hellhounds elsewhere. This should definitively fix the Bone Guard + Houndlord scam.
 - Searing Seal now actually deals 1 damage per 4 charges instead of per 5 charges.
 - Minions will now use spells inherited from the player indiscriminately against all targets regardless of immunity, to make redeals easier. This used to be highly inconsistent as some spells arbitrarily had damage_type defined and some didn't.
-- Mercurial geists are now ice-immune like all other metallic units. The only reason they weren't ice-immune in the first place was because the default 50% ice resistance of undead units happened to be set before the default ice immunity of metallic units.
+- Metallic undead units are now ice-immune like all other metallic units. The only reason they weren't ice-immune in the first place was because the default 50% ice resistance of undead units happened to be set before the default ice immunity of metallic units.
 - Archon, Seraph, and Idol of Beauty units now have their proper elemental tags.
 - Upon reincarnation, Floating Eye now casts your eye spells again.
 - Invoke Savagery will no longer try to hit physical-immune enemies unless the minion doing the attack has physical redeals.
@@ -33,3 +33,4 @@ This mod changes a number of things so that they behave exactly as described, wh
 - Radiant Chill and Frozen Skull shrine will now ignore ice-immune enemies when choosing their targets, resulting in no dud freezing attempts.
 - Steam elementals from Steam Anima are now also ice units.
 - Seal Fate Spreading Curse no longer tries to apply the debuff to targets already affected by the debuff.
+- Metallic undead units are now ice-immune like all other metallic units. The only reason they weren't ice-immune in the first place was because the default 50% ice resistance of undead units happened to be set before the default ice immunity of metallic units.

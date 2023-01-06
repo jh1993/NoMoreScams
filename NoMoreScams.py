@@ -870,29 +870,6 @@ def modify_class(cls):
             if desc:
                 self.draw_wrapped_string(desc, self.examine_display, cur_x, cur_y, width, extra_space=True)
 
-    if cls is MercurizeBuff:
-
-        def on_death(self, evt):
-            geist = Ghost()
-            geist.name = "Mercurial %s" % self.owner.name
-            geist.asset_name = "mercurial_geist"
-            geist.max_hp = self.owner.max_hp
-            geist.tags.append(Tags.Metallic)
-            geist.resists[Tags.Ice] = 100
-            trample = SimpleMeleeAttack(damage=self.spell.get_stat('minion_damage'))
-            geist.spells = [trample]
-
-            if self.spell.get_stat('noxious_aura'):
-                geist.buffs.append(DamageAuraBuff(damage=1, damage_type=Tags.Poison, radius=self.spell.get_stat("radius", base=2)))
-            if self.spell.get_stat('vengeance'):
-                geist.buffs.append(MercurialVengeance(self.spell))
-            
-            self.owner.level.queue_spell(do_summon(self, geist))
-
-        def do_summon(self, geist):
-            self.spell.summon(geist, target=self.owner)
-            yield
-
     if cls is HeavenlyIdol:
 
         def cast_instant(self, x, y):
@@ -920,6 +897,40 @@ def modify_class(cls):
             self.summon(idol, Point(x, y))
 
     if cls is Level:
+
+        def set_default_resitances(self, unit):
+
+            if Tags.Metallic in unit.tags:
+                unit.resists.setdefault(Tags.Fire, 50)
+                unit.resists.setdefault(Tags.Physical, 50)
+                unit.resists.setdefault(Tags.Lightning, 100)
+                unit.resists.setdefault(Tags.Ice, 100)
+
+            if Tags.Glass in unit.tags:
+                unit.resists.setdefault(Tags.Fire, 50)
+                unit.resists.setdefault(Tags.Physical, -100)
+                unit.resists.setdefault(Tags.Lightning, 100)
+                unit.resists.setdefault(Tags.Ice, 100)
+
+            if Tags.Demon in unit.tags:
+                unit.resists.setdefault(Tags.Holy, -100)
+                unit.resists.setdefault(Tags.Dark, 100)
+
+            # Set undead resistances after metallic, so metallic undead units are immune to ice.
+            if Tags.Undead in unit.tags:
+                unit.resists.setdefault(Tags.Holy, -100)
+                unit.resists.setdefault(Tags.Dark, 100)
+                unit.resists.setdefault(Tags.Ice, 50)
+
+            # Poison only works on living, nature, or demons.  Not so hot vs arcane, constructs, ect.
+            if Tags.Living in unit.tags:
+                unit.resists.setdefault(Tags.Poison, 0)
+            if Tags.Nature in unit.tags:
+                unit.resists.setdefault(Tags.Poison, 0)
+            elif Tags.Demon in unit.tags:
+                unit.resists.setdefault(Tags.Poison, 0)
+            else:
+                unit.resists.setdefault(Tags.Poison, 100)
 
         def can_move(self, unit, x, y, teleport=False, force_swap=False):
 
@@ -1024,5 +1035,5 @@ def modify_class(cls):
         if hasattr(cls, func_name):
             setattr(cls, func_name, func)
 
-for cls in [SlimeBuff, HallowFlesh, MeltSpell, MeltBuff, Buff, RedStarShrineBuff, Spell, Unit, ElementalClawBuff, LightningSpireArc, Houndlord, SearingSealBuff, SummonArchon, SummonSeraphim, SummonFloatingEye, InvokeSavagerySpell, ShrapnelBlast, Purestrike, GlassPetrifyBuff, SummonKnights, VoidBeamSpell, DamageAuraBuff, VolcanoTurtleBuff, MordredCorruption, Shrine, PyGameView, MercurizeBuff, HeavenlyIdol, Level, RadiantCold, FrozenSkullShrineBuff, SteamAnima, SealedFateBuff]:
+for cls in [SlimeBuff, HallowFlesh, MeltSpell, MeltBuff, Buff, RedStarShrineBuff, Spell, Unit, ElementalClawBuff, LightningSpireArc, Houndlord, SearingSealBuff, SummonArchon, SummonSeraphim, SummonFloatingEye, InvokeSavagerySpell, ShrapnelBlast, Purestrike, GlassPetrifyBuff, SummonKnights, VoidBeamSpell, DamageAuraBuff, VolcanoTurtleBuff, MordredCorruption, Shrine, PyGameView, HeavenlyIdol, Level, RadiantCold, FrozenSkullShrineBuff, SteamAnima, SealedFateBuff]:
     curr_module.modify_class(cls)
