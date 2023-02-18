@@ -34,3 +34,4 @@ This mod changes a number of things so that they behave exactly as described, wh
 - Steam elementals from Steam Anima are now also ice units.
 - Seal Fate Spreading Curse no longer tries to apply the debuff to targets already affected by the debuff.
 - Metallic undead units are now ice-immune like all other metallic units. The only reason they weren't ice-immune in the first place was because the default 50% ice resistance of undead units happened to be set before the default ice immunity of metallic units.
+- Spider Queen now has a minion health stat of 14 rather than 10, for the purpose of Vigor shrine.

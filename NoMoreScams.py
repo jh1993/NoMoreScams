@@ -1031,9 +1031,29 @@ def modify_class(cls):
                         target = random.choice(possible_targets)
                         target.apply_buff(SealedFateBuff(self.spell), self.spell.get_stat('delay'))
 
+    if cls is SummonSpiderQueen:
+
+        def on_init(self):
+            self.name = "Spider Queen"
+            self.tags = [Tags.Nature, Tags.Conjuration]
+
+            self.max_charges = 2
+            self.level = 5
+
+            self.upgrades["aether"] = (1, 3, "Aether Queen", "Summon an aether spider queen instead.", "species")
+            self.upgrades["steel"] = (1, 3, "Steel Queen", "Summon a steel spider queen instead.", "species")
+
+            self.must_target_walkable = True
+            self.must_target_empty = True
+
+            self.minion_damage = GiantSpider().spells[0].damage
+            self.minion_health = 14
+
+            self.num_summons = 4
+
     for func_name, func in [(key, value) for key, value in locals().items() if callable(value)]:
         if hasattr(cls, func_name):
             setattr(cls, func_name, func)
 
-for cls in [SlimeBuff, HallowFlesh, MeltSpell, MeltBuff, Buff, RedStarShrineBuff, Spell, Unit, ElementalClawBuff, LightningSpireArc, Houndlord, SearingSealBuff, SummonArchon, SummonSeraphim, SummonFloatingEye, InvokeSavagerySpell, ShrapnelBlast, Purestrike, GlassPetrifyBuff, SummonKnights, VoidBeamSpell, DamageAuraBuff, VolcanoTurtleBuff, MordredCorruption, Shrine, PyGameView, HeavenlyIdol, Level, RadiantCold, FrozenSkullShrineBuff, SteamAnima, SealedFateBuff]:
+for cls in [SlimeBuff, HallowFlesh, MeltSpell, MeltBuff, Buff, RedStarShrineBuff, Spell, Unit, ElementalClawBuff, LightningSpireArc, Houndlord, SearingSealBuff, SummonArchon, SummonSeraphim, SummonFloatingEye, InvokeSavagerySpell, ShrapnelBlast, Purestrike, GlassPetrifyBuff, SummonKnights, VoidBeamSpell, DamageAuraBuff, VolcanoTurtleBuff, MordredCorruption, Shrine, PyGameView, HeavenlyIdol, Level, RadiantCold, FrozenSkullShrineBuff, SteamAnima, SealedFateBuff, SummonSpiderQueen]:
     curr_module.modify_class(cls)
