@@ -10,7 +10,7 @@ import math, random, sys
 
 curr_module = sys.modules[__name__]
 
-def is_immune(target, source, damage_type, already_checked=[]):
+def is_immune(target, source, damage_type, already_checked):
 
     if target.resists[damage_type] < 100:
         return False
@@ -211,9 +211,9 @@ def modify_class(cls):
 
         def on_init(self):
             self.global_triggers[EventOnPreDamaged] = self.on_damage
-            self.can_redeal = lambda u, source, damage_type, already_checked=[]: can_redeal(self, u, source, damage_type, already_checked)
+            self.can_redeal = lambda u, source, damage_type, already_checked: can_redeal(self, u, source, damage_type, already_checked)
 
-        def can_redeal(self, u, source, damage_type, already_checked=[]):
+        def can_redeal(self, u, source, damage_type, already_checked):
             return source.owner and isinstance(source.owner.source, self.spell_class) and (Tags.Arcane in u.tags or Tags.Dark in u.tags or Tags.Fire in u.tags) and not is_immune(u, self, Tags.Holy, already_checked)
 
     if cls is Spell:
@@ -229,10 +229,10 @@ def modify_class(cls):
                     return False
                 if hasattr(self, 'damage_type') and not self.level:
                     if isinstance(self.damage_type, list):
-                        if all(is_immune(u, self, dtype) for dtype in self.damage_type):
+                        if all(is_immune(u, self, dtype, []) for dtype in self.damage_type):
                             return False
                     else:
-                        if is_immune(u, self, self.damage_type):
+                        if is_immune(u, self, self.damage_type, []):
                             return False
                 if not self.can_cast(u.x, u.y):
                     return False
@@ -265,7 +265,7 @@ def modify_class(cls):
                 if not dtypes:
                     return True
                 for dtype in dtypes:
-                    if not is_immune(v, self, dtype):
+                    if not is_immune(v, self, dtype, []):
                         return True
 
             nearby_enemies = self.caster.level.get_units_in_ball(self.caster, self.get_stat("range") + radius)
@@ -311,10 +311,10 @@ def modify_class(cls):
                     return True
                 if isinstance(s.damage_type, list):
                     for d in s.damage_type:
-                        if not is_immune(other, s, d):
+                        if not is_immune(other, s, d, []):
                             return True
                 else:
-                    if not is_immune(other, s, s.damage_type):
+                    if not is_immune(other, s, s.damage_type, []):
                         return True
             return False
 
@@ -323,9 +323,9 @@ def modify_class(cls):
         def on_init(self):
             self.global_triggers[EventOnPreDamaged] = self.on_damage
             self.dtype = None
-            self.can_redeal = lambda u, source, damage_type, already_checked=[]: can_redeal(self, u, source, damage_type, already_checked)
+            self.can_redeal = lambda u, source, damage_type, already_checked: can_redeal(self, u, source, damage_type, already_checked)
 
-        def can_redeal(self, u, source, damage_type, already_checked=[]):
+        def can_redeal(self, u, source, damage_type, already_checked):
             return damage_type == Tags.Physical and source.owner and isinstance(source.owner.source, self.spell_class) and not is_immune(u, self, self.dtype, already_checked)
 
     if cls is LightningSpireArc:
@@ -470,7 +470,7 @@ def modify_class(cls):
                 attack.statholder = unit
                 attack.caster = unit
                 attack.owner = unit
-                possible_targets = [u for u in self.caster.level.get_units_in_ball(unit, radius=1, diag=True) if are_hostile(u, self.caster) and not is_immune(u, attack, attack.damage_type)]
+                possible_targets = [u for u in self.caster.level.get_units_in_ball(unit, radius=1, diag=True) if are_hostile(u, self.caster) and not is_immune(u, attack, attack.damage_type, [])]
                 if possible_targets:
                     target = random.choice(possible_targets)
                     self.caster.level.act_cast(unit, attack, target.x, target.y, pay_costs=False)
@@ -523,7 +523,7 @@ def modify_class(cls):
             self.tags = [Tags.Holy, Tags.Arcane]
             self.level = 5
             self.global_triggers[EventOnPreDamaged] = self.on_damage
-            self.can_redeal = lambda unit, source, damage_type, already_checked=[]: can_redeal(self, unit, source, damage_type, already_checked)
+            self.can_redeal = lambda unit, source, damage_type, already_checked: can_redeal(self, unit, source, damage_type, already_checked)
 
         def on_damage(self, evt):
             if evt.damage_type != Tags.Physical:
@@ -538,7 +538,7 @@ def modify_class(cls):
                 return
             self.owner.level.queue_spell(self.do_conversion(evt))
         
-        def can_redeal(self, u, source, damage_type, already_checked=[]):
+        def can_redeal(self, u, source, damage_type, already_checked):
             return damage_type == Tags.Physical and source.owner and source.owner.shields > 0 and (not is_immune(u, self, Tags.Holy, already_checked) or not is_immune(u, self, Tags.Arcane, already_checked))
 
     if cls is GlassPetrifyBuff:
