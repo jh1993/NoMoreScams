@@ -333,7 +333,7 @@ def modify_class(cls):
         def can_target(self, t):
             if not are_hostile(self.owner, t):
                 return False
-            if not self.get_stat('resistance_debuff') and is_immune(t, self, Tags.Lightning):
+            if not self.get_stat('resistance_debuff') and is_immune(t, self, Tags.Lightning, []):
                 return False
             if not self.owner.level.can_see(self.owner.x, self.owner.y, t.x, t.y):
                 return self.get_stat('requires_los')
