@@ -101,7 +101,8 @@ def modify_class(cls):
                     self.owner.cur_hp //= 2
                     unit = self.spawner()
                     unit.team = self.owner.team
-                    unit.source = self.owner.source
+                    if not unit.source:
+                        unit.source = self.owner.source
                     self.owner.level.add_obj(unit, p.x, p.y)
 
     if cls is HallowFlesh:
