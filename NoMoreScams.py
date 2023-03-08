@@ -803,8 +803,18 @@ def modify_class(cls):
             # Autogen boring part of description
             for tag, bonuses in self.examine_target.tag_bonuses.items():
                 for attr, val in bonuses.items():
+                    if attr == "requires_los":
+                        continue
+                    if val >= 0:
+                        word = "gain"
+                    else:
+                        val = -val
+                        word = "lose"
                     #cur_color = tag.color
-                    fmt = "%s spells and skills gain [%s_%s:%s]." % (tag.name, val, attr, attr)
+                    if attr in tooltip_colors:
+                        fmt = "[%s] spells and skills %s [%s_%s:%s]." % (tag.name, word, val, attr, attr)
+                    else:
+                        fmt = "[%s] spells and skills %s %s %s." % (tag.name, word, val, format_attr(attr))
                     lines = self.draw_wrapped_string(fmt, self.examine_display, cur_x, cur_y, width=width)
                     cur_y += (lines+1) * self.linesize
                 cur_y += self.linesize
@@ -818,20 +828,34 @@ def modify_class(cls):
                     continue
 
                 for attr, val in useful_bonuses:
+                    if attr == "requires_los":
+                        continue
+                    if val >= 0:
+                        word = "gains"
+                    else:
+                        val = -val
+                        word = "loses"
                     upgrade_bonus = not hasattr(spell_ex, attr) and attr in attr_colors.keys()
                     if attr in tooltip_colors:
-                        fmt = "%s gains [%s_%s:%s]%s" % (spell_ex.name, val, attr, attr, " if its upgrades use this stat" if upgrade_bonus else "")
+                        fmt = "%s %s [%s_%s:%s]%s" % (spell_ex.name, word, val, attr, attr, " if its upgrades use this stat" if upgrade_bonus else "")
                     else:
-                        fmt = "%s gains %d %s%s" % (spell_ex.name, val, format_attr(attr), " if its upgrades use this stat" if upgrade_bonus else "")
+                        fmt = "%s %s %s %s%s" % (spell_ex.name, word, val, format_attr(attr), " if its upgrades use this stat" if upgrade_bonus else "")
                     lines = self.draw_wrapped_string(fmt, self.examine_display, cur_x, cur_y, width=width)
                     cur_y += (lines+1) * self.linesize
                 cur_y += self.linesize
 
             for attr, val in self.examine_target.global_bonuses.items():
+                if attr == "requires_los":
+                    continue
                 if val >= 0:
-                    fmt = "All spells and skills gain %d %s" % (val, format_attr(attr))
+                    word = "gain"
                 else:
-                    fmt = "All spells and skills lose %d %s" % (-val, format_attr(attr))
+                    val = -val
+                    word = "lose"
+                if attr in tooltip_colors:
+                    fmt = "All spells and skills %s [%s_%s:%s]" % (word, val, attr, attr)
+                else:
+                    fmt = "All spells and skills %s %s %s" % (word, val, format_attr(attr))
                 lines = self.draw_wrapped_string(fmt, self.examine_display, cur_x, cur_y, width)
                 cur_y += (lines+1) * self.linesize
 
