@@ -82,28 +82,31 @@ def modify_class(cls):
                 self.description = "50%% chance to gain %d HP and max HP per turn.  Upon reaching %d HP, splits into 2 %s." % (self.growth, self.to_split, self.spawner_name)
 
         def on_advance(self):
-            if random.random() < .5:
+            if random.random() >= .5:
+                remainder_chance = random.random()
+                if self.owner.cur_hp == self.owner.max_hp:
+                    self.owner.max_hp += self.gr_integer
+                    if self.gr_remainder > 0 and remainder_chance < self.gr_remainder:
+                        self.owner.max_hp += 1
+                self.owner.deal_damage(-self.gr_integer, Tags.Heal, self)
+                if self.gr_remainder > 0 and remainder_chance < self.gr_remainder:
+                    self.owner.deal_damage(-1, Tags.Heal, self)
+
+            if self.owner.cur_hp < self.to_split:
                 return
             
-            remainder_chance = random.random()
-            if self.owner.cur_hp == self.owner.max_hp:
-                self.owner.max_hp += self.gr_integer
-                if self.gr_remainder > 0 and remainder_chance < self.gr_remainder:
-                    self.owner.max_hp += 1
-            self.owner.deal_damage(-self.gr_integer, Tags.Heal, self)
-            if self.gr_remainder > 0 and remainder_chance < self.gr_remainder:
-                self.owner.deal_damage(-1, Tags.Heal, self)
-            if self.owner.cur_hp >= self.to_split:
-
+            single = self.to_split//2
+            while self.owner.max_hp >= self.to_split:
                 p = self.owner.level.get_summon_point(self.owner.x, self.owner.y)
-                if p:
-                    self.owner.max_hp //= 2
-                    self.owner.cur_hp //= 2
-                    unit = self.spawner()
-                    unit.team = self.owner.team
-                    if not unit.source:
-                        unit.source = self.owner.source
-                    self.owner.level.add_obj(unit, p.x, p.y)
+                if not p:
+                    return
+                self.owner.max_hp -= single
+                self.owner.cur_hp = self.owner.max_hp
+                unit = self.spawner()
+                unit.team = self.owner.team
+                if not unit.source:
+                    unit.source = self.owner.source
+                self.owner.level.add_obj(unit, p.x, p.y)
 
     if cls is HallowFlesh:
 
