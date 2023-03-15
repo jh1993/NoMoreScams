@@ -803,9 +803,51 @@ def modify_class(cls):
 
             is_passive = isinstance(self.examine_target, Upgrade) and not self.examine_target.prereq
 
-            # Autogen boring part of description
-            for tag, bonuses in self.examine_target.tag_bonuses.items():
-                for attr, val in bonuses.items():
+            if not hasattr(self.examine_target, "no_display_stats"):
+                # Autogen boring part of description
+                for tag, bonuses in self.examine_target.tag_bonuses.items():
+                    for attr, val in bonuses.items():
+                        if attr == "requires_los":
+                            continue
+                        if val >= 0:
+                            word = "gain"
+                        else:
+                            val = -val
+                            word = "lose"
+                        #cur_color = tag.color
+                        if attr in tooltip_colors:
+                            fmt = "[%s] spells and skills %s [%s_%s:%s]." % (tag.name, word, val, attr, attr)
+                        else:
+                            fmt = "[%s] spells and skills %s %s %s." % (tag.name, word, val, format_attr(attr))
+                        lines = self.draw_wrapped_string(fmt, self.examine_display, cur_x, cur_y, width=width)
+                        cur_y += (lines+1) * self.linesize
+                    cur_y += self.linesize
+
+                for spell, bonuses in self.examine_target.spell_bonuses.items():
+                    spell_ex = spell()
+
+                    useful_bonuses = [(attr, val) for (attr, val) in bonuses.items() if hasattr(spell_ex, attr) or (not isinstance(val, float) and attr in attr_colors.keys())]
+                    if not useful_bonuses:
+                        continue
+
+                    for attr, val in useful_bonuses:
+                        if attr == "requires_los":
+                            continue
+                        if val >= 0:
+                            word = "gains"
+                        else:
+                            val = -val
+                            word = "loses"
+                        upgrade_bonus = not hasattr(spell_ex, attr) and attr in attr_colors.keys()
+                        if attr in tooltip_colors:
+                            fmt = "%s %s [%s_%s:%s]%s" % (spell_ex.name, word, val, attr, attr, " if its upgrades use this stat" if upgrade_bonus else "")
+                        else:
+                            fmt = "%s %s %s %s%s" % (spell_ex.name, word, val, format_attr(attr), " if its upgrades use this stat" if upgrade_bonus else "")
+                        lines = self.draw_wrapped_string(fmt, self.examine_display, cur_x, cur_y, width=width)
+                        cur_y += (lines+1) * self.linesize
+                    cur_y += self.linesize
+
+                for attr, val in self.examine_target.global_bonuses.items():
                     if attr == "requires_los":
                         continue
                     if val >= 0:
@@ -813,75 +855,33 @@ def modify_class(cls):
                     else:
                         val = -val
                         word = "lose"
-                    #cur_color = tag.color
                     if attr in tooltip_colors:
-                        fmt = "[%s] spells and skills %s [%s_%s:%s]." % (tag.name, word, val, attr, attr)
+                        fmt = "All spells and skills %s [%s_%s:%s]" % (word, val, attr, attr)
                     else:
-                        fmt = "[%s] spells and skills %s %s %s." % (tag.name, word, val, format_attr(attr))
-                    lines = self.draw_wrapped_string(fmt, self.examine_display, cur_x, cur_y, width=width)
+                        fmt = "All spells and skills %s %s %s" % (word, val, format_attr(attr))
+                    lines = self.draw_wrapped_string(fmt, self.examine_display, cur_x, cur_y, width)
                     cur_y += (lines+1) * self.linesize
-                cur_y += self.linesize
 
-
-            for spell, bonuses in self.examine_target.spell_bonuses.items():
-                spell_ex = spell()
-
-                useful_bonuses = [(attr, val) for (attr, val) in bonuses.items() if hasattr(spell_ex, attr) or (not isinstance(val, float) and attr in attr_colors.keys())]
-                if not useful_bonuses:
-                    continue
-
-                for attr, val in useful_bonuses:
-                    if attr == "requires_los":
+                has_resists = False
+                for tag in Tags:
+                    if tag not in self.examine_target.resists or tag == Tags.Heal:
                         continue
-                    if val >= 0:
-                        word = "gains"
+                    self.draw_string('%d%% Resist %s' % (self.examine_target.resists[tag], tag.name), self.examine_display, cur_x, cur_y, tag.color.to_tup())
+                    has_resists = True
+                    cur_y += self.linesize
+
+                if has_resists:
+                    cur_y += self.linesize
+
+                amount = self.examine_target.resists[Tags.Heal]
+                if amount != 0:
+                    if amount > 0:
+                        word = "Penalty"
                     else:
-                        val = -val
-                        word = "loses"
-                    upgrade_bonus = not hasattr(spell_ex, attr) and attr in attr_colors.keys()
-                    if attr in tooltip_colors:
-                        fmt = "%s %s [%s_%s:%s]%s" % (spell_ex.name, word, val, attr, attr, " if its upgrades use this stat" if upgrade_bonus else "")
-                    else:
-                        fmt = "%s %s %s %s%s" % (spell_ex.name, word, val, format_attr(attr), " if its upgrades use this stat" if upgrade_bonus else "")
-                    lines = self.draw_wrapped_string(fmt, self.examine_display, cur_x, cur_y, width=width)
-                    cur_y += (lines+1) * self.linesize
-                cur_y += self.linesize
-
-            for attr, val in self.examine_target.global_bonuses.items():
-                if attr == "requires_los":
-                    continue
-                if val >= 0:
-                    word = "gain"
-                else:
-                    val = -val
-                    word = "lose"
-                if attr in tooltip_colors:
-                    fmt = "All spells and skills %s [%s_%s:%s]" % (word, val, attr, attr)
-                else:
-                    fmt = "All spells and skills %s %s %s" % (word, val, format_attr(attr))
-                lines = self.draw_wrapped_string(fmt, self.examine_display, cur_x, cur_y, width)
-                cur_y += (lines+1) * self.linesize
-
-            has_resists = False
-            for tag in Tags:
-                if tag not in self.examine_target.resists or tag == Tags.Heal:
-                    continue
-                self.draw_string('%d%% Resist %s' % (self.examine_target.resists[tag], tag.name), self.examine_display, cur_x, cur_y, tag.color.to_tup())
-                has_resists = True
-                cur_y += self.linesize
-
-            if has_resists:
-                cur_y += self.linesize
-
-            amount = self.examine_target.resists[Tags.Heal]
-            if amount != 0:
-                if amount > 0:
-                    word = "Penalty"
-                else:
-                    amount *= -1
-                    word = "Bonus"
-                self.draw_string('%d%% Healing %s' % (amount, word), self.examine_display, cur_x, cur_y, Tags.Heal.color.to_tup())
-                cur_y += self.linesize*2
+                        amount *= -1
+                        word = "Bonus"
+                    self.draw_string('%d%% Healing %s' % (amount, word), self.examine_display, cur_x, cur_y, Tags.Heal.color.to_tup())
+                    cur_y += self.linesize*2
 
             desc = self.examine_target.get_description()
             if not desc:
