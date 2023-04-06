@@ -1079,9 +1079,53 @@ def modify_class(cls):
 
             self.num_summons = 4
 
+    if cls is BoonShrineBuff:
+
+        def on_init(self):
+            self.ally_map = defaultdict(int)
+            self.owner_triggers[EventOnSpellCast] = self.on_spell_cast
+
+        def on_advance(self):
+            for unit in list(self.ally_map.keys()):
+                if unit.is_alive():
+                    self.ally_map[unit] += 1
+                else:
+                    self.ally_map.pop(unit)
+
+        def on_spell_cast(self, evt):
+            if not type(evt.spell) == self.spell_class:
+                return
+
+            allies = [u for u in self.owner.level.units if u is not self.owner and not are_hostile(self.owner, u)]
+            if not allies:
+                return
+            
+            never_cast = [u for u in allies if u not in self.ally_map]
+            if never_cast:
+                newcaster = random.choice(never_cast)
+            else:
+                newcaster = max(allies, key=lambda u: self.ally_map[u])
+
+            spell = type(evt.spell)()
+            spell.cur_charges = 1
+            spell.caster = newcaster
+            spell.owner = newcaster
+            spell.statholder = self.owner
+
+            if spell.can_cast(newcaster.x, newcaster.y):
+                self.owner.level.act_cast(newcaster, spell, newcaster.x, newcaster.y)
+
+    if cls is BoonShrine:
+
+        def on_init(self):
+            self.name = "Boon"
+            self.tags = [Tags.Enchantment]
+            self.description = "Self targeted spells only.\nWhenever you cast this spell, an ally also casts it.\nAllies who have never cast this spell are prioritized, then allies who have cast this spell the longest time ago are prioritized."
+            self.buff_class = BoonShrineBuff
+
     for func_name, func in [(key, value) for key, value in locals().items() if callable(value)]:
         if hasattr(cls, func_name):
             setattr(cls, func_name, func)
 
-for cls in [SlimeBuff, HallowFlesh, MeltSpell, MeltBuff, Buff, RedStarShrineBuff, Spell, Unit, ElementalClawBuff, LightningSpireArc, Houndlord, SearingSealBuff, SummonArchon, SummonSeraphim, SummonFloatingEye, InvokeSavagerySpell, ShrapnelBlast, Purestrike, GlassPetrifyBuff, SummonKnights, VoidBeamSpell, DamageAuraBuff, VolcanoTurtleBuff, MordredCorruption, Shrine, PyGameView, HeavenlyIdol, Level, RadiantCold, FrozenSkullShrineBuff, SteamAnima, SealedFateBuff, SummonSpiderQueen]:
+for cls in [SlimeBuff, HallowFlesh, MeltSpell, MeltBuff, Buff, RedStarShrineBuff, Spell, Unit, ElementalClawBuff, LightningSpireArc, Houndlord, SearingSealBuff, SummonArchon, SummonSeraphim, SummonFloatingEye, InvokeSavagerySpell, ShrapnelBlast, Purestrike, GlassPetrifyBuff, SummonKnights, VoidBeamSpell, DamageAuraBuff, VolcanoTurtleBuff, MordredCorruption, Shrine, PyGameView, HeavenlyIdol, Level, RadiantCold, FrozenSkullShrineBuff, SteamAnima, SealedFateBuff, SummonSpiderQueen, BoonShrineBuff, BoonShrine]:
     curr_module.modify_class(cls)
