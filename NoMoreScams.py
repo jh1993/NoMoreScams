@@ -58,13 +58,15 @@ class FloatingEyeBuff(Buff):
     
     def on_applied(self, owner):
         for spell in self.spell.caster.spells:
-            if Tags.Eye in spell.tags and spell.range == 0:
-                # Temporarily change caster of spell
-                spell = type(spell)()
-                spell.caster = self.owner
-                spell.owner = self.owner
-                spell.statholder = self.spell.caster
-                self.spell.caster.level.act_cast(self.owner, spell, self.owner.x, self.owner.y, pay_costs=False)
+            if Tags.Eye not in spell.tags:
+                continue
+            spell_copy = type(spell)()
+            spell_copy.caster = self.owner
+            spell_copy.owner = self.owner
+            spell_copy.statholder = self.spell.caster
+            if not spell_copy.can_cast(self.owner.x, self.owner.y):
+                continue
+            self.spell.caster.level.act_cast(self.owner, spell_copy, self.owner.x, self.owner.y, pay_costs=False)
 
 def modify_class(cls):
 
