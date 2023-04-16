@@ -1125,9 +1125,23 @@ def modify_class(cls):
             self.description = "Self targeted spells only.\nWhenever you cast this spell, an ally also casts it.\nAllies who have never cast this spell are prioritized, then allies who have cast this spell the longest time ago are prioritized."
             self.buff_class = BoonShrineBuff
 
+    if cls is SpiderWeb:
+
+        def __init__(self):
+            Cloud.__init__(self)
+            self.name = "Spider Web"
+            self.color = Color(210, 210, 210)
+            self.description = "Any non-spider unit entering the web is stunned for 1 turn.  This destroys the web."
+            self.duration = 12
+
+            self.asset_name = 'web'
+
+        def on_damage(self, dtype):
+            pass
+
     for func_name, func in [(key, value) for key, value in locals().items() if callable(value)]:
         if hasattr(cls, func_name):
             setattr(cls, func_name, func)
 
-for cls in [SlimeBuff, HallowFlesh, MeltSpell, MeltBuff, Buff, RedStarShrineBuff, Spell, Unit, ElementalClawBuff, LightningSpireArc, Houndlord, SearingSealBuff, SummonArchon, SummonSeraphim, SummonFloatingEye, InvokeSavagerySpell, ShrapnelBlast, Purestrike, GlassPetrifyBuff, SummonKnights, VoidBeamSpell, DamageAuraBuff, VolcanoTurtleBuff, MordredCorruption, Shrine, PyGameView, HeavenlyIdol, Level, RadiantCold, FrozenSkullShrineBuff, SteamAnima, SealedFateBuff, SummonSpiderQueen, BoonShrineBuff, BoonShrine]:
+for cls in [SlimeBuff, HallowFlesh, MeltSpell, MeltBuff, Buff, RedStarShrineBuff, Spell, Unit, ElementalClawBuff, LightningSpireArc, Houndlord, SearingSealBuff, SummonArchon, SummonSeraphim, SummonFloatingEye, InvokeSavagerySpell, ShrapnelBlast, Purestrike, GlassPetrifyBuff, SummonKnights, VoidBeamSpell, DamageAuraBuff, VolcanoTurtleBuff, MordredCorruption, Shrine, PyGameView, HeavenlyIdol, Level, RadiantCold, FrozenSkullShrineBuff, SteamAnima, SealedFateBuff, SummonSpiderQueen, BoonShrineBuff, BoonShrine, SpiderWeb]:
     curr_module.modify_class(cls)
