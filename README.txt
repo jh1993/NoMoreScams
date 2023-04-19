@@ -37,3 +37,4 @@ This mod changes a number of things so that they behave exactly as described, wh
 - Spider Queen now has a minion health stat of 14 rather than 10, for the purpose of Vigor shrine.
 - Boon shrine now prioritizes minions that have never cast the spell, then prioritizes minions that have cast the spell the longest time ago.
 - Fire damage no longer destroys spider webs. This behavior is removed due to the extreme inconsistency in in whether any effect tries to deal fire damage to empty tiles, which depends on the implementation details of each damage source and can be completely arbitrary; it's the only instance where dealing damage to empty tiles actually matters.
+- Melee retaliation no longer damages allies.

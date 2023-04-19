@@ -1139,9 +1139,19 @@ def modify_class(cls):
         def on_damage(self, dtype):
             pass
 
+    if cls is Thorns:
+
+        def on_spell(self, evt):
+            if not isinstance(evt.source, Spell) or not (isinstance(evt.source, LeapAttack) or evt.source.melee) or not are_hostile(evt.source.caster, self.owner):
+                return
+            self.owner.level.queue_spell(self.do_thorns(evt.source.caster))
+
+        def get_tooltip(self):
+            return "Deals %d %s damage to hostile melee attackers" % (self.damage, self.dtype.name)
+
     for func_name, func in [(key, value) for key, value in locals().items() if callable(value)]:
         if hasattr(cls, func_name):
             setattr(cls, func_name, func)
 
-for cls in [SlimeBuff, HallowFlesh, MeltSpell, MeltBuff, Buff, RedStarShrineBuff, Spell, Unit, ElementalClawBuff, LightningSpireArc, Houndlord, SearingSealBuff, SummonArchon, SummonSeraphim, SummonFloatingEye, InvokeSavagerySpell, ShrapnelBlast, Purestrike, GlassPetrifyBuff, SummonKnights, VoidBeamSpell, DamageAuraBuff, VolcanoTurtleBuff, MordredCorruption, Shrine, PyGameView, HeavenlyIdol, Level, RadiantCold, FrozenSkullShrineBuff, SteamAnima, SealedFateBuff, SummonSpiderQueen, BoonShrineBuff, BoonShrine, SpiderWeb]:
+for cls in [SlimeBuff, HallowFlesh, MeltSpell, MeltBuff, Buff, RedStarShrineBuff, Spell, Unit, ElementalClawBuff, LightningSpireArc, Houndlord, SearingSealBuff, SummonArchon, SummonSeraphim, SummonFloatingEye, InvokeSavagerySpell, ShrapnelBlast, Purestrike, GlassPetrifyBuff, SummonKnights, VoidBeamSpell, DamageAuraBuff, VolcanoTurtleBuff, MordredCorruption, Shrine, PyGameView, HeavenlyIdol, Level, RadiantCold, FrozenSkullShrineBuff, SteamAnima, SealedFateBuff, SummonSpiderQueen, BoonShrineBuff, BoonShrine, SpiderWeb, Thorns]:
     curr_module.modify_class(cls)
