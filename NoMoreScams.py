@@ -8,6 +8,19 @@ from RiftWizard import *
 
 import math, random, sys
 
+def fix_earth_elemental(unit):
+    unit.tags = [Tags.Elemental, Tags.Nature]
+    unit.resists[Tags.Poison] = 100
+
+def fix_hallowed_earth_elemental(unit):
+    unit.tags = [Tags.Elemental, Tags.Nature, Tags.Holy]
+    unit.resists[Tags.Poison] = 100
+
+import mods.Bugfixes.Bugfixes
+bugged_units_fixer = mods.Bugfixes.Bugfixes.bugged_units_fixer
+bugged_units_fixer["Earth Elemental"] = fix_earth_elemental
+bugged_units_fixer["Hallowed Earth Elemental"] = fix_hallowed_earth_elemental
+
 curr_module = sys.modules[__name__]
 
 def is_immune(target, source, damage_type, already_checked):
