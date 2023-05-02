@@ -1162,9 +1162,50 @@ def modify_class(cls):
         def get_tooltip(self):
             return "Deals %d %s damage to hostile melee attackers" % (self.damage, self.dtype.name)
 
+    if cls is ToadHop:
+
+        def on_init(self):
+            self.name = "Frog Hop"
+            self.range = 4
+            self.cool_down = 4
+            self.description = "Hop closer to the closest enemy in line of sight if no other ability can be used."
+        
+        def get_ai_target(self):
+            
+            for s in self.caster.spells:
+                if s is self:
+                    continue
+                if not s.can_pay_costs():
+                    continue
+                if s.get_ai_target():
+                    return None
+            
+            targets = [u for u in self.caster.level.get_units_in_los(self.caster) if are_hostile(u, self.caster)]
+            if not targets:
+                return None
+            targets.sort(key=lambda unit: distance(unit, self.caster))
+            hop_range = self.get_stat("range")
+            for target in targets:
+                points = [p for p in self.caster.level.get_points_in_line(target, self.caster, find_clear=True) if self.caster.level.can_stand(p.x, p.y, self.caster) and distance(p, self.caster) <= hop_range]
+                if not points:
+                    continue
+                return min(points, key=lambda point: distance(point, target))
+            return None
+
+        def cast(self, x, y):
+            if not self.caster.level.can_move(self.caster, x, y, teleport=True):
+                return
+            self.caster.invisible = True
+            old_point = Point(self.caster.x, self.caster.y)
+            self.caster.level.act_move(self.caster, x, y, teleport=True)
+            for p in Bolt(self.caster.level, old_point, Point(x, y)):
+                self.caster.level.leap_effect(p.x, p.y, Tags.Physical.color, self.caster)
+                yield
+            self.caster.invisible = False
+
     for func_name, func in [(key, value) for key, value in locals().items() if callable(value)]:
         if hasattr(cls, func_name):
             setattr(cls, func_name, func)
 
-for cls in [SlimeBuff, HallowFlesh, MeltSpell, MeltBuff, Buff, RedStarShrineBuff, Spell, Unit, ElementalClawBuff, LightningSpireArc, Houndlord, SearingSealBuff, SummonArchon, SummonSeraphim, SummonFloatingEye, InvokeSavagerySpell, ShrapnelBlast, Purestrike, GlassPetrifyBuff, SummonKnights, VoidBeamSpell, DamageAuraBuff, VolcanoTurtleBuff, MordredCorruption, Shrine, PyGameView, HeavenlyIdol, Level, RadiantCold, FrozenSkullShrineBuff, SteamAnima, SealedFateBuff, SummonSpiderQueen, BoonShrineBuff, BoonShrine, SpiderWeb, Thorns]:
+for cls in [SlimeBuff, HallowFlesh, MeltSpell, MeltBuff, Buff, RedStarShrineBuff, Spell, Unit, ElementalClawBuff, LightningSpireArc, Houndlord, SearingSealBuff, SummonArchon, SummonSeraphim, SummonFloatingEye, InvokeSavagerySpell, ShrapnelBlast, Purestrike, GlassPetrifyBuff, SummonKnights, VoidBeamSpell, DamageAuraBuff, VolcanoTurtleBuff, MordredCorruption, Shrine, PyGameView, HeavenlyIdol, Level, RadiantCold, FrozenSkullShrineBuff, SteamAnima, SealedFateBuff, SummonSpiderQueen, BoonShrineBuff, BoonShrine, SpiderWeb, Thorns, ToadHop]:
     curr_module.modify_class(cls)
