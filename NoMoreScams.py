@@ -241,6 +241,9 @@ def modify_class(cls):
             if self.self_target:
                 return self.caster if self.can_cast(self.caster.x, self.caster.y) else None
 
+            if hasattr(self, "radius") and self.radius > 0:
+                return self.get_corner_target(self.get_stat("radius"))
+
             def is_good_target(u):    
                 if not u:
                     return False
@@ -278,7 +281,7 @@ def modify_class(cls):
                     dtypes = self.damage_type
             
             def is_target(v):
-                if not are_hostile(self.caster, v):
+                if bool(self.target_allies) == bool(are_hostile(v, self.caster)):
                     return False
                 # if no damage type is specified, take any hostile target
                 if not dtypes:
