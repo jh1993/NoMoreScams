@@ -14,7 +14,6 @@ This mod changes a number of things so that they behave exactly as described, wh
 - Minions now take all redeal skills and shrines into account when targeting enemies with immunities. Conditional redeals like Purestrike and Red Star shrine are included.
 - Mordred's planeshift will no longer delete minions summoned by conjuration skills, e.g. Faestone.
 - If adjacent squares are blocked by minions summoned by conjuration skills, Houndlord will shunt the hellhounds elsewhere. This should definitively fix the Bone Guard + Houndlord scam.
-- Searing Seal now actually deals 1 damage per 4 charges instead of per 5 charges.
 - Minions will now use spells inherited from the player indiscriminately against all targets regardless of immunity, to make redeals easier. This used to be highly inconsistent as some spells arbitrarily had damage_type defined and some didn't.
 - Metallic undead units are now ice-immune like all other metallic units. The only reason they weren't ice-immune in the first place was because the default 50% ice resistance of undead units happened to be set before the default ice immunity of metallic units.
 - Archon, Seraph, and Idol of Beauty units now have their proper elemental tags.
