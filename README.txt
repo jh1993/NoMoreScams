@@ -39,3 +39,4 @@ This mod changes a number of things so that they behave exactly as described, wh
 - Melee retaliation no longer damages allies.
 - Earth elementals and hallowed earth elementals are now nature units.
 - Toads no longer waste a turn hopping if they can use other abilities, and will now always hop closer to the closest enemy it can.
+- Orb of Corruption now triggers the wizard's on entering new realm effects.

@@ -745,6 +745,8 @@ def modify_class(cls):
 
             self.caster.level.gen_params.ensure_connectivity()
             self.caster.level.gen_params.ensure_connectivity(chasm=True)
+            self.caster.level.event_manager.raise_event(EventOnUnitPreAdded(self.caster), self.caster)
+            self.caster.level.event_manager.raise_event(EventOnUnitAdded(self.caster), self.caster)
             yield
 
         def on_init(self):
