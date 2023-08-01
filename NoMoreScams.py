@@ -1164,7 +1164,7 @@ def modify_class(cls):
             self.name = "Frog Hop"
             self.range = 4
             self.cool_down = 4
-            self.description = "Hop closer to the closest enemy in line of sight if no other ability can be used."
+            self.description = "Hop closer to the closest reachable enemy if no other ability can be used."
         
         def get_ai_target(self):
             
@@ -1176,16 +1176,22 @@ def modify_class(cls):
                 if s.get_ai_target():
                     return None
             
-            targets = [u for u in self.caster.level.get_units_in_los(self.caster) if are_hostile(u, self.caster)]
+            targets = [u for u in self.caster.level.units if are_hostile(u, self.caster) and self.caster.can_harm(u)]
             if not targets:
                 return None
-            targets.sort(key=lambda unit: distance(unit, self.caster))
-            hop_range = self.get_stat("range")
+            paths = {}
             for target in targets:
-                points = [p for p in self.caster.level.get_points_in_line(target, self.caster, find_clear=True) if self.caster.level.can_stand(p.x, p.y, self.caster) and distance(p, self.caster) <= hop_range]
-                if not points:
+                path = self.caster.level.find_path(self.caster, target, self.caster, pythonize=True)
+                if not path:
                     continue
-                return min(points, key=lambda point: distance(point, target))
+                paths[target] = path
+            if not paths:
+                return None
+            target = min(paths.keys(), key=lambda t: len(paths[t]))
+
+            for p in reversed(paths[target]):
+                if self.caster.level.can_move(self.caster, p.x, p.y, teleport=True) and self.can_cast(p.x, p.y):
+                    return p
             return None
 
         def cast(self, x, y):
