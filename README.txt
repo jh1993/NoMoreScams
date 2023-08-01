@@ -41,3 +41,4 @@ This mod changes a number of things so that they behave exactly as described, wh
 - Toads no longer waste a turn hopping if they can use other abilities, and will now always hop closer to the closest enemy it can.
 - Orb of Corruption now triggers the wizard's on entering new realm effects.
 - Death Bolt skeleton will now be shunted to a nearby tile if the original tile is occupied, instead of failing to be summoned.
+- Archons will now shoot at allies with less than 20 SH to shield them if there are no targetable enemies.

@@ -1212,9 +1212,21 @@ def modify_class(cls):
                 self.summon(skeleton, target=unit)
                 yield
 
+    if cls is ArchonLightning:
+
+        def get_ai_target(self):
+            target = Spell.get_ai_target(self)
+            if target:
+                return target
+            units = [u for u in self.caster.level.get_units_in_ball(self.caster, self.get_stat("range")) if u.shields < 20 and not are_hostile(self.caster, u) and self.can_cast(u.x, u.y)]
+            if units:
+                unit = random.choice(units)
+                return Point(unit.x, unit.y)
+            return None
+
     for func_name, func in [(key, value) for key, value in locals().items() if callable(value)]:
         if hasattr(cls, func_name):
             setattr(cls, func_name, func)
 
-for cls in [SlimeBuff, HallowFlesh, MeltSpell, MeltBuff, Buff, RedStarShrineBuff, Spell, Unit, ElementalClawBuff, LightningSpireArc, Houndlord, SummonArchon, SummonSeraphim, SummonFloatingEye, InvokeSavagerySpell, ShrapnelBlast, Purestrike, GlassPetrifyBuff, SummonKnights, VoidBeamSpell, DamageAuraBuff, VolcanoTurtleBuff, MordredCorruption, Shrine, PyGameView, HeavenlyIdol, Level, RadiantCold, FrozenSkullShrineBuff, SteamAnima, SealedFateBuff, SummonSpiderQueen, BoonShrineBuff, BoonShrine, SpiderWeb, Thorns, ToadHop, DeathBolt]:
+for cls in [SlimeBuff, HallowFlesh, MeltSpell, MeltBuff, Buff, RedStarShrineBuff, Spell, Unit, ElementalClawBuff, LightningSpireArc, Houndlord, SummonArchon, SummonSeraphim, SummonFloatingEye, InvokeSavagerySpell, ShrapnelBlast, Purestrike, GlassPetrifyBuff, SummonKnights, VoidBeamSpell, DamageAuraBuff, VolcanoTurtleBuff, MordredCorruption, Shrine, PyGameView, HeavenlyIdol, Level, RadiantCold, FrozenSkullShrineBuff, SteamAnima, SealedFateBuff, SummonSpiderQueen, BoonShrineBuff, BoonShrine, SpiderWeb, Thorns, ToadHop, DeathBolt, ArchonLightning]:
     curr_module.modify_class(cls)
