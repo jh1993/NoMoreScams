@@ -1211,7 +1211,7 @@ def modify_class(cls):
             if unit and not unit.is_alive():
                 if self.get_stat('soulbattery'):
                     self.damage += 1
-                skeleton = curr_module.raise_skeleton(caster, unit, source=self, summon=False)
+                skeleton = mods.Bugfixes.Bugfixes.raise_skeleton(caster, unit, source=self, summon=False)
                 if not skeleton:
                     return
                 skeleton.spells[0].damage = self.get_stat('minion_damage')
