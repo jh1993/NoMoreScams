@@ -1230,9 +1230,23 @@ def modify_class(cls):
                 return Point(unit.x, unit.y)
             return None
 
+    if cls is CollectedAgony:
+
+        def get_description(self):
+            return ("Each turn, deal twice the total of all [poison] damage dealt to all units this turn to the nearest enemy as [dark] damage. Enemies immune to [dark] damage will not be targeted.").format(**self.fmt_dict())
+
+        def on_advance(self):
+            if self.charges > 0:
+                options = [u for u in self.owner.level.units if are_hostile(u, self.owner) and not is_immune(u, self, Tags.Dark, [])]
+                if not options:
+                    return
+                target = min(options, key=lambda unit: distance(unit, self.owner))
+                self.owner.level.queue_spell(self.do_damage(target, 2*self.charges))
+            self.charges = 0
+
     for func_name, func in [(key, value) for key, value in locals().items() if callable(value)]:
         if hasattr(cls, func_name):
             setattr(cls, func_name, func)
 
-for cls in [SlimeBuff, HallowFlesh, MeltSpell, MeltBuff, Buff, RedStarShrineBuff, Spell, Unit, ElementalClawBuff, LightningSpireArc, Houndlord, SummonArchon, SummonSeraphim, SummonFloatingEye, InvokeSavagerySpell, ShrapnelBlast, Purestrike, GlassPetrifyBuff, SummonKnights, VoidBeamSpell, DamageAuraBuff, VolcanoTurtleBuff, MordredCorruption, Shrine, PyGameView, HeavenlyIdol, Level, RadiantCold, FrozenSkullShrineBuff, SteamAnima, SealedFateBuff, SummonSpiderQueen, BoonShrineBuff, BoonShrine, SpiderWeb, Thorns, ToadHop, DeathBolt, ArchonLightning]:
+for cls in [SlimeBuff, HallowFlesh, MeltSpell, MeltBuff, Buff, RedStarShrineBuff, Spell, Unit, ElementalClawBuff, LightningSpireArc, Houndlord, SummonArchon, SummonSeraphim, SummonFloatingEye, InvokeSavagerySpell, ShrapnelBlast, Purestrike, GlassPetrifyBuff, SummonKnights, VoidBeamSpell, DamageAuraBuff, VolcanoTurtleBuff, MordredCorruption, Shrine, PyGameView, HeavenlyIdol, Level, RadiantCold, FrozenSkullShrineBuff, SteamAnima, SealedFateBuff, SummonSpiderQueen, BoonShrineBuff, BoonShrine, SpiderWeb, Thorns, ToadHop, DeathBolt, ArchonLightning, CollectedAgony]:
     curr_module.modify_class(cls)
