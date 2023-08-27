@@ -43,3 +43,4 @@ This mod changes a number of things so that they behave exactly as described, wh
 - Death Bolt skeleton will now be shunted to a nearby tile if the original tile is occupied, instead of failing to be summoned.
 - Archons will now shoot at allies with less than 20 SH to shield them if there are no targetable enemies.
 - Collected Agony now ignores dark-immune enemies.
+- My Bugfixes mod made Horror and Shock Value able to refresh stun and berserk on enemies, but this also made those skills target randomly even when enemies without those debuffs are visible. Now those skills prioritize enemies without their corresponding debuffs.

@@ -1244,9 +1244,62 @@ def modify_class(cls):
                 self.owner.level.queue_spell(self.do_damage(target, 2*self.charges))
             self.charges = 0
 
+    if cls is Horror:
+
+        def on_death(self, evt):
+            if not evt.damage_event or evt.damage_event.damage_type != Tags.Dark or not are_hostile(evt.unit, self.owner):
+                return
+            def eligible(u):
+                if u is evt.unit:
+                    return False
+                if not are_hostile(u, self.owner):
+                    return False
+                if not self.owner.level.can_see(evt.unit.x, evt.unit.y, u.x, u.y):
+                    return False
+                return True
+            candidates = [u for u in self.owner.level.units if eligible(u)]
+            def has_actual_stun(u):
+                for buff in u.buffs:
+                    if type(buff) == Stun:
+                        return True
+                return False
+            stunned = [u for u in candidates if has_actual_stun(u)]
+            random.shuffle(stunned)
+            targets = [u for u in candidates if u not in stunned]
+            random.shuffle(targets)
+            targets.extend(stunned)
+            if not targets:
+                return
+            duration = self.get_stat('duration')
+            for c in targets[:self.get_stat("num_targets")]:
+                c.apply_buff(Stun(), duration)
+
+    if cls is ShockAndAwe:
+
+        def on_death(self, evt):
+            if not evt.damage_event or evt.damage_event.damage_type != Tags.Lightning or not are_hostile(evt.unit, self.owner):
+                return
+            def eligible(u):
+                if u is evt.unit:
+                    return False
+                if not are_hostile(u, self.owner):
+                    return False
+                if not self.owner.level.can_see(evt.unit.x, evt.unit.y, u.x, u.y):
+                    return False
+                return True
+            candidates = [u for u in self.owner.level.units if eligible(u)]
+            if not candidates:
+                return
+            not_berserked = [u for u in candidates if not u.has_buff(BerserkBuff)]
+            if not_berserked:
+                target = random.choice(not_berserked)
+            else:
+                target = random.choice(candidates)
+            target.apply_buff(BerserkBuff(), self.get_stat("duration"))
+
     for func_name, func in [(key, value) for key, value in locals().items() if callable(value)]:
         if hasattr(cls, func_name):
             setattr(cls, func_name, func)
 
-for cls in [SlimeBuff, HallowFlesh, MeltSpell, MeltBuff, Buff, RedStarShrineBuff, Spell, Unit, ElementalClawBuff, LightningSpireArc, Houndlord, SummonArchon, SummonSeraphim, SummonFloatingEye, InvokeSavagerySpell, ShrapnelBlast, Purestrike, GlassPetrifyBuff, SummonKnights, VoidBeamSpell, DamageAuraBuff, VolcanoTurtleBuff, MordredCorruption, Shrine, PyGameView, HeavenlyIdol, Level, RadiantCold, FrozenSkullShrineBuff, SteamAnima, SealedFateBuff, SummonSpiderQueen, BoonShrineBuff, BoonShrine, SpiderWeb, Thorns, ToadHop, DeathBolt, ArchonLightning, CollectedAgony]:
+for cls in [SlimeBuff, HallowFlesh, MeltSpell, MeltBuff, Buff, RedStarShrineBuff, Spell, Unit, ElementalClawBuff, LightningSpireArc, Houndlord, SummonArchon, SummonSeraphim, SummonFloatingEye, InvokeSavagerySpell, ShrapnelBlast, Purestrike, GlassPetrifyBuff, SummonKnights, VoidBeamSpell, DamageAuraBuff, VolcanoTurtleBuff, MordredCorruption, Shrine, PyGameView, HeavenlyIdol, Level, RadiantCold, FrozenSkullShrineBuff, SteamAnima, SealedFateBuff, SummonSpiderQueen, BoonShrineBuff, BoonShrine, SpiderWeb, Thorns, ToadHop, DeathBolt, ArchonLightning, CollectedAgony, Horror, ShockAndAwe]:
     curr_module.modify_class(cls)
