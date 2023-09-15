@@ -983,7 +983,7 @@ def modify_class(cls):
             if blocker is not None:
                 if force_swap:
                     # Even with force swap, cannot force walkers onto chasms
-                    if not blocker.flying and not self.tiles[x][y].can_walk:
+                    if not blocker.flying and not self.tiles[unit.x][unit.y].can_walk:
                         return False
 
                 elif not unit.is_player_controlled or unit.team != blocker.team:
