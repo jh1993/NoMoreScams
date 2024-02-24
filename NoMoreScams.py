@@ -1150,11 +1150,6 @@ def modify_class(cls):
 
     if cls is Thorns:
 
-        def on_spell(self, evt):
-            if not isinstance(evt.source, Spell) or not (isinstance(evt.source, LeapAttack) or evt.source.melee) or not are_hostile(evt.source.caster, self.owner):
-                return
-            self.owner.level.queue_spell(self.do_thorns(evt.source.caster))
-
         def get_tooltip(self):
             return "Deals %d %s damage to hostile melee attackers" % (self.damage, self.dtype.name)
 
