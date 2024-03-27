@@ -61,7 +61,7 @@ def is_immune(target, source, damage_type, already_checked):
     return True
 
 def is_conj_skill_summon(unit):
-    return unit.source and isinstance(unit.source, Upgrade) and unit.source.tags and Tags.Conjuration in unit.source.tags
+    return unit.source and isinstance(unit.source, Upgrade) and not unit.source.prereq and Tags.Conjuration in unit.source.tags
 
 class FloatingEyeBuff(Buff):
 
@@ -339,6 +339,17 @@ def modify_class(cls):
                     if not is_immune(other, s, s.damage_type, []):
                         return True
             return False
+
+        def try_dismiss_ally(self):
+            # dont dismiss in tests ect
+            if not self.level.player_unit:
+                return
+
+            if not any(are_hostile(self.level.player_unit, u) for u in self.level.units):
+                if not self.is_player_controlled and not is_conj_skill_summon(self):
+                    if random.random() < .1:
+                        self.kill(trigger_death_event=False)
+                        self.level.show_effect(self.x, self.y, Tags.Translocation)
 
     if cls is ElementalClawBuff:
 
