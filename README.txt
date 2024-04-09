@@ -45,3 +45,4 @@ This mod changes a number of things so that they behave exactly as described, wh
 - Collected Agony now ignores dark-immune enemies.
 - My Bugfixes mod made Horror and Shock Value able to refresh stun and berserk on enemies, but this also made those skills target randomly even when enemies without those debuffs are visible. Now those skills prioritize enemies without their corresponding debuffs.
 - Minions summoned by conjuration skills will no longer be unsummoned when there are no enemies. This is to prevent the situation of clearing a realm, having those minions unsummoned, then using an Orb of Corruption to un-clear the realm.
+- Petrification Aura can now refresh petrify duration on petrified enemies, but prioritizes unpetrified enemies.

@@ -87,14 +87,13 @@ def modify_class(cls):
 
         def on_applied(self, owner):
             self.start_hp = self.owner.max_hp
-            self.to_split = self.start_hp * 2
-            self.growth = self.start_hp / 10
+            self.to_split = self.start_hp*2
+            self.growth = self.start_hp/10
             self.gr_integer = math.floor(self.growth)
             self.gr_remainder = self.growth - self.gr_integer
-            if self.gr_remainder > 0:
-                self.description = "50%% chance to gain HP and max HP per turn. The amount gained has a %d%% chance to be %d and %d%% chance to be %d. Upon reaching %d HP, splits into 2 %s." % (round(self.gr_remainder*100), self.gr_integer + 1, round((1 - self.gr_remainder)*100), self.gr_integer, self.to_split, self.spawner_name)
-            else:
-                self.description = "50%% chance to gain %d HP and max HP per turn.  Upon reaching %d HP, splits into 2 %s." % (self.growth, self.to_split, self.spawner_name)
+
+        def get_tooltip(self):
+            return "50%% chance to gain %.1f max and current HP per turn on average. Upon reaching %d HP, splits into 2 %s." % (self.growth, self.to_split, self.spawner_name)
 
         def on_advance(self):
             if random.random() >= .5:
@@ -1303,9 +1302,32 @@ def modify_class(cls):
                 target = random.choice(candidates)
             target.apply_buff(BerserkBuff(), self.get_stat("duration"))
 
+    if cls is StoneAuraBuff:
+
+        def on_advance(self):
+            BuffClass = GlassPetrifyBuff if self.spell.get_stat('glassify') else PetrifyBuff
+            units = [u for u in self.owner.level.get_units_in_ball(self.owner, self.spell.get_stat('radius')) if are_hostile(u, self.owner)]
+            stoned = [u for u in units if u.has_buff(BuffClass)]
+            random.shuffle(stoned)
+            targets = [u for u in units if u not in stoned]
+            random.shuffle(targets)
+            targets.extend(stoned)
+            if not targets:
+                return
+            duration = self.spell.get_stat('petrify_duration')
+            for u in targets[:self.spell.get_stat('num_targets')]:
+                u.apply_buff(BuffClass(), duration)
+
+    if cls is StoneAuraSpell:
+
+        def get_description(self):
+            return ("Each turn, inflict [petrify] on up to [{num_targets}:num_targets] enemy units in a [{radius}_tile:radius] radius for [{petrify_duration}_turns:duration].\n" +
+                    text.petrify_desc + '\n'
+                    "Lasts [{duration}_turns:duration].").format(**self.fmt_dict())
+
     for func_name, func in [(key, value) for key, value in locals().items() if callable(value)]:
         if hasattr(cls, func_name):
             setattr(cls, func_name, func)
 
-for cls in [SlimeBuff, HallowFlesh, MeltSpell, MeltBuff, Buff, RedStarShrineBuff, Spell, Unit, ElementalClawBuff, LightningSpireArc, Houndlord, SummonArchon, SummonSeraphim, SummonFloatingEye, InvokeSavagerySpell, ShrapnelBlast, Purestrike, GlassPetrifyBuff, SummonKnights, VoidBeamSpell, DamageAuraBuff, VolcanoTurtleBuff, MordredCorruption, Shrine, PyGameView, HeavenlyIdol, Level, RadiantCold, FrozenSkullShrineBuff, SteamAnima, SealedFateBuff, SummonSpiderQueen, BoonShrineBuff, BoonShrine, SpiderWeb, Thorns, ToadHop, DeathBolt, ArchonLightning, CollectedAgony, Horror, ShockAndAwe]:
+for cls in [SlimeBuff, HallowFlesh, MeltSpell, MeltBuff, Buff, RedStarShrineBuff, Spell, Unit, ElementalClawBuff, LightningSpireArc, Houndlord, SummonArchon, SummonSeraphim, SummonFloatingEye, InvokeSavagerySpell, ShrapnelBlast, Purestrike, GlassPetrifyBuff, SummonKnights, VoidBeamSpell, DamageAuraBuff, VolcanoTurtleBuff, MordredCorruption, Shrine, PyGameView, HeavenlyIdol, Level, RadiantCold, FrozenSkullShrineBuff, SteamAnima, SealedFateBuff, SummonSpiderQueen, BoonShrineBuff, BoonShrine, SpiderWeb, Thorns, ToadHop, DeathBolt, ArchonLightning, CollectedAgony, Horror, ShockAndAwe, StoneAuraBuff, StoneAuraSpell]:
     curr_module.modify_class(cls)
