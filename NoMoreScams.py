@@ -339,17 +339,6 @@ def modify_class(cls):
                         return True
             return False
 
-        def try_dismiss_ally(self):
-            # dont dismiss in tests ect
-            if not self.level.player_unit:
-                return
-
-            if not any(are_hostile(self.level.player_unit, u) for u in self.level.units):
-                if not self.is_player_controlled and not is_conj_skill_summon(self):
-                    if random.random() < .1:
-                        self.kill(trigger_death_event=False)
-                        self.level.show_effect(self.x, self.y, Tags.Translocation)
-
     if cls is ElementalClawBuff:
 
         def on_init(self):
@@ -755,8 +744,9 @@ def modify_class(cls):
 
             self.caster.level.gen_params.ensure_connectivity()
             self.caster.level.gen_params.ensure_connectivity(chasm=True)
-            self.caster.level.event_manager.raise_event(EventOnUnitPreAdded(self.caster), self.caster)
-            self.caster.level.event_manager.raise_event(EventOnUnitAdded(self.caster), self.caster)
+            if hasattr(self, "item") and self.item:
+                self.caster.level.event_manager.raise_event(EventOnUnitPreAdded(self.caster), self.caster)
+                self.caster.level.event_manager.raise_event(EventOnUnitAdded(self.caster), self.caster)
             yield
 
         def on_init(self):
