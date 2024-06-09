@@ -1153,6 +1153,14 @@ def modify_class(cls):
         def get_tooltip(self):
             return "Deals %d %s damage to hostile melee attackers" % (self.damage, self.dtype.name)
 
+        def on_spell(self, evt):
+            if evt.x != self.owner.x or evt.y != self.owner.y:
+                return
+            # Distance is implied to be 1 if its a leap or a melee
+            if not (isinstance(evt.spell, LeapAttack) or evt.spell.melee) or not are_hostile(evt.caster, self.owner):
+                return
+            self.owner.level.queue_spell(self.do_thorns(evt.caster))
+
     if cls is ToadHop:
 
         def on_init(self):
